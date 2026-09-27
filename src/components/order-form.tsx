@@ -37,6 +37,7 @@ function trackPixels(total: number, variant: string, phone: string) {
       currency: "UAH",
       content_name: variant,
     });
+    win.fbq?.("track", "Purchase", { value: total, currency: "UAH" });
   } catch {
     // піксель не має ламати форму
   }
