@@ -414,10 +414,17 @@
   color: #fff;
 }
 
+.story .shot-btn {
+  background: transparent;
+  line-height: 0;
+}
+
 .story img {
+  display: block;
   width: 100%;
+  height: auto;
   border-radius: 0;
-  margin: 8px 0 18px;
+  margin: 0;
 }
 
 .benefit-card {
