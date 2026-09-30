@@ -2,10 +2,11 @@ import { useId, useRef, useState, type FormEvent } from "react";
 import { Phone, User } from "lucide-react";
 import { readAttribution } from "@/lib/attribution";
 import { OFFERS, type Offer } from "@/lib/offers";
-import { isValidName, normalizeUaPhone } from "@/lib/phone";
+import { formatUaPhone, isValidName, normalizeUaPhone } from "@/lib/phone";
 
 type LeadResponse = {
   success?: boolean;
+  order_id?: string;
   error?: string;
 };
 
@@ -13,34 +14,18 @@ function messageFor(code: string | undefined): string {
   if (code === "bad_name") return "Вкажіть ім’я — щонайменше 2 символи.";
   if (code === "bad_phone") return "Вкажіть мобільний номер України, наприклад 067 123 45 67.";
   if (code === "rate") return "Забагато спроб. Зачекайте кілька хвилин і спробуйте ще раз.";
-  return "Не вдалося надіслати заявку. Спробуйте ще раз.";
+  return "Не вдалося відправити, спробуйте ще раз";
 }
 
-function trackPixels(total: number, variant: string, phone: string) {
-  const win = window as Window & {
-    ttq?: {
-      identify?: (payload: Record<string, string>) => void;
-      track: (event: string, payload?: Record<string, unknown>) => void;
-    };
-    fbq?: (...args: unknown[]) => void;
-  };
-  const canonical = normalizeUaPhone(phone);
-  try {
-    if (canonical) win.ttq?.identify?.({ phone_number: `+${canonical}` });
-    win.ttq?.track("SubmitForm", { value: total, currency: "UAH" });
-  } catch {
-    // піксель не має ламати форму
+const PRODUCT_NAME = "Аквакристал — таблетки для пральних машин";
+
+function readCookie(name: string): string {
+  const prefix = `${name}=`;
+  for (const part of document.cookie.split(";")) {
+    const item = part.trim();
+    if (item.startsWith(prefix)) return decodeURIComponent(item.slice(prefix.length));
   }
-  try {
-    win.fbq?.("track", "Lead", {
-      value: total,
-      currency: "UAH",
-      content_name: variant,
-    });
-    win.fbq?.("track", "Purchase", { value: total, currency: "UAH" });
-  } catch {
-    // піксель не має ламати форму
-  }
+  return "";
 }
 
 export function OrderForm({
@@ -51,7 +36,7 @@ export function OrderForm({
   onOffer: (offer: Offer) => void;
 }) {
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("+380 ");
   const [website, setWebsite] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -80,11 +65,13 @@ export function OrderForm({
     const attr = readAttribution();
     const payload = {
       name: cleanName,
-      phone,
+      phone: normalizeUaPhone(phone) ?? phone,
       quantity: offer.quantity,
       variant: offer.variant,
       total: offer.total,
       page: window.location.href,
+      fbp: readCookie("_fbp"),
+      fbc: readCookie("_fbc"),
       website,
       utm_source: attr.utm_source,
       utm_medium: attr.utm_medium,
@@ -95,6 +82,7 @@ export function OrderForm({
       ttclid: attr.ttclid,
       gclid: attr.gclid,
     };
+    let leave = false;
     try {
       const response = await fetch("/api/lead", {
         method: "POST",
@@ -102,16 +90,38 @@ export function OrderForm({
         body: JSON.stringify(payload),
       });
       const data = (await response.json().catch(() => ({}))) as LeadResponse;
+      if (data.success === true && data.order_id) {
+        const canonical = normalizeUaPhone(phone) ?? "";
+        try {
+          sessionStorage.setItem(
+            "dyakuiemo_order",
+            JSON.stringify({
+              order_id: data.order_id,
+              name: cleanName,
+              phone: canonical,
+              variant: offer.variant,
+              quantity: offer.quantity,
+              total: offer.total,
+              product: PRODUCT_NAME,
+            }),
+          );
+        } catch {
+          /* storage blocked */
+        }
+        leave = true;
+        window.location.assign("/dyakuiemo");
+        return;
+      }
       if (data.success === true) {
-        trackPixels(offer.total, offer.variant, phone);
-        setDone({ name: cleanName, offer });
+        leave = true;
+        window.location.assign("/dyakuiemo");
         return;
       }
       setError(messageFor(data.error));
     } catch {
       setError(messageFor(undefined));
     } finally {
-      setPending(false);
+      if (!leave) setPending(false);
     }
   }
 
@@ -191,10 +201,10 @@ export function OrderForm({
           type="tel"
           inputMode="tel"
           autoComplete="tel"
-          placeholder="Номер телефону"
+          placeholder="+380 67 123 45 67"
           maxLength={20}
           value={phone}
-          onChange={(event) => setPhone(event.target.value)}
+          onChange={(event) => setPhone(formatUaPhone(event.target.value))}
           required
         />
       </div>

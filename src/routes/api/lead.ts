@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { waitUntil } from "@vercel/functions";
+import { makeOrderId, sendMetaCapi } from "@/lib/meta-capi.server";
 import { ATTR_FIELDS, type Attribution } from "@/lib/attribution";
 import { getOfferByQuantity, unitPrice } from "@/lib/offers";
 import { isValidName, normalizeUaPhone } from "@/lib/phone";
@@ -234,8 +236,19 @@ export const Route = createFileRoute("/api/lead")({
           attr[field] = clip(body[field], 300);
         }
 
+        const clientVariant = clip(body.variant, 300);
+        const clientTotal = Number(body.total);
+        if (!clientVariant) return json({ success: false, error: "bad_variant" }, 400);
+        if (!Number.isFinite(clientTotal) || clientTotal <= 0) {
+          return json({ success: false, error: "bad_total" }, 400);
+        }
+
         const total = offer.total;
         const variant = offer.variant;
+        if (clientVariant !== variant || Math.round(clientTotal) !== total) {
+          return json({ success: false, error: "bad_total" }, 400);
+        }
+        const orderId = makeOrderId();
         const perUnit = unitPrice(total, offer.quantity);
         const payload = {
           name,
@@ -255,30 +268,56 @@ export const Route = createFileRoute("/api/lead")({
           ip,
           unitPrice: perUnit,
           userAgent: clip(request.headers.get("user-agent"), 300),
-          leadId: crypto.randomUUID(),
+          leadId: orderId,
+          order_id: orderId,
         };
 
-        const upstream = scriptUrl();
-        if (!upstream) {
-          if (process.env.VERCEL) return json({ success: false, error: "upstream_failed" });
-          return json({ success: true });
-        }
+        const fbp = clip(body.fbp, 200);
+        const fbc = clip(body.fbc, 300);
+        const userAgent = clip(request.headers.get("user-agent"), 500);
+        const pageUrl = clip(body.page, 500);
 
-        try {
-          const upstreamResult = await readUpstream(upstream, JSON.stringify(payload));
-          if (!isUpstreamSuccess(upstreamResult.status, upstreamResult.raw)) {
-            console.error(
-              "[lead] upstream failed",
-              upstreamResult.status,
-              upstreamResult.raw.slice(0, 160).replace(/\d{6,}/g, "…"),
-            );
-            return json({ success: false, error: "upstream_failed" });
-          }
-          return json({ success: true });
-        } catch (error) {
-          console.error("[lead] upstream error", error instanceof Error ? error.name : "unknown");
-          return json({ success: false, error: "upstream_failed" });
-        }
+        waitUntil(
+          (async () => {
+            const upstream = scriptUrl();
+            const bodyJson = JSON.stringify(payload);
+            if (!upstream) {
+              console.error("[lead] sheet failed", "missing GOOGLE_SCRIPT_URL", bodyJson);
+            } else {
+              let last = "";
+              let ok = false;
+              for (let attempt = 0; attempt < 3; attempt++) {
+                if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 2000));
+                try {
+                  const upstreamResult = await readUpstream(upstream, bodyJson);
+                  if (isUpstreamSuccess(upstreamResult.status, upstreamResult.raw)) {
+                    ok = true;
+                    break;
+                  }
+                  last = `${upstreamResult.status} ${upstreamResult.raw.slice(0, 300)}`;
+                } catch (error) {
+                  last = error instanceof Error ? error.message : "error";
+                }
+              }
+              if (!ok) console.error("[lead] sheet failed", last, bodyJson);
+            }
+            await sendMetaCapi({
+              orderId,
+              page: pageUrl,
+              name,
+              phone,
+              total,
+              variant,
+              ip,
+              userAgent,
+              fbp,
+              fbc,
+              fbclid: attr.fbclid,
+            });
+          })(),
+        );
+
+        return json({ success: true, order_id: orderId });
       },
     },
   },
