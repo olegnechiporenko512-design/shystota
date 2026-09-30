@@ -12,7 +12,7 @@ type LeadResponse = {
 
 function messageFor(code: string | undefined): string {
   if (code === "bad_name") return "Вкажіть ім’я — щонайменше 2 символи.";
-  if (code === "bad_phone") return "Вкажіть мобільний номер України, наприклад 067 123 45 67.";
+  if (code === "bad_phone") return "Перевірте номер — має бути 9 цифр після +380.";
   if (code === "rate") return "Забагато спроб. Зачекайте кілька хвилин і спробуйте ще раз.";
   return "Не вдалося відправити, спробуйте ще раз";
 }

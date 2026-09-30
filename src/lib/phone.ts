@@ -1,24 +1,3 @@
-const OPERATORS = new Set([
-  "39",
-  "50",
-  "63",
-  "66",
-  "67",
-  "68",
-  "73",
-  "75",
-  "77",
-  "91",
-  "92",
-  "93",
-  "94",
-  "95",
-  "96",
-  "97",
-  "98",
-  "99",
-]);
-
 export function isValidName(name: string): boolean {
   return name.trim().length >= 2;
 }
@@ -48,11 +27,9 @@ export function formatUaPhone(value: string): string {
   return digits.length === 0 ? "+380 " : out;
 }
 
-/** Повертає 380XXXXXXXXX або null. */
+/** Повертає 380XXXXXXXXX або null, якщо після зрізання 0/80/380 не лишилось рівно 9 цифр. */
 export function normalizeUaPhone(input: string): string | null {
   const national = nationalDigits(input);
   if (national.length !== 9) return null;
-  const digits = `380${national}`;
-  if (!OPERATORS.has(digits.slice(3, 5))) return null;
-  return digits;
+  return `380${national}`;
 }
