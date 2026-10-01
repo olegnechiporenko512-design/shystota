@@ -12,10 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DeliveryRouteImport } from './routes/delivery'
+import { Route as DyakuiemoRouteImport } from './routes/dyakuiemo'
 import { Route as OfferRouteImport } from './routes/offer'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReturnsRouteImport } from './routes/returns'
-import { Route as DyakuiemoRouteImport } from './routes/dyakuiemo'
 import { Route as ApiLeadRouteImport } from './routes/api/lead'
 
 const IndexRoute = IndexRouteImport.update({
@@ -33,6 +33,11 @@ const DeliveryRoute = DeliveryRouteImport.update({
   path: '/delivery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DyakuiemoRoute = DyakuiemoRouteImport.update({
+  id: '/dyakuiemo',
+  path: '/dyakuiemo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OfferRoute = OfferRouteImport.update({
   id: '/offer',
   path: '/offer',
@@ -48,11 +53,6 @@ const ReturnsRoute = ReturnsRouteImport.update({
   path: '/returns',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DyakuiemoRoute = DyakuiemoRouteImport.update({
-  id: '/dyakuiemo',
-  path: '/dyakuiemo',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiLeadRoute = ApiLeadRouteImport.update({
   id: '/api/lead',
   path: '/api/lead',
@@ -63,20 +63,20 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/delivery': typeof DeliveryRoute
+  '/dyakuiemo': typeof DyakuiemoRoute
   '/offer': typeof OfferRoute
   '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
-  '/dyakuiemo': typeof DyakuiemoRoute
   '/api/lead': typeof ApiLeadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/delivery': typeof DeliveryRoute
+  '/dyakuiemo': typeof DyakuiemoRoute
   '/offer': typeof OfferRoute
   '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
-  '/dyakuiemo': typeof DyakuiemoRoute
   '/api/lead': typeof ApiLeadRoute
 }
 export interface FileRoutesById {
@@ -84,10 +84,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
   '/delivery': typeof DeliveryRoute
+  '/dyakuiemo': typeof DyakuiemoRoute
   '/offer': typeof OfferRoute
   '/privacy': typeof PrivacyRoute
   '/returns': typeof ReturnsRoute
-  '/dyakuiemo': typeof DyakuiemoRoute
   '/api/lead': typeof ApiLeadRoute
 }
 export interface FileRouteTypes {
@@ -96,38 +96,41 @@ export interface FileRouteTypes {
     | '/'
     | '/cookies'
     | '/delivery'
+    | '/dyakuiemo'
     | '/offer'
     | '/privacy'
     | '/returns'
-    | '/dyakuiemo' | '/api/lead'
+    | '/api/lead'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/cookies'
     | '/delivery'
+    | '/dyakuiemo'
     | '/offer'
     | '/privacy'
     | '/returns'
-    | '/dyakuiemo' | '/api/lead'
+    | '/api/lead'
   id:
     | '__root__'
     | '/'
     | '/cookies'
     | '/delivery'
+    | '/dyakuiemo'
     | '/offer'
     | '/privacy'
     | '/returns'
-    | '/dyakuiemo' | '/api/lead'
+    | '/api/lead'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CookiesRoute: typeof CookiesRoute
   DeliveryRoute: typeof DeliveryRoute
+  DyakuiemoRoute: typeof DyakuiemoRoute
   OfferRoute: typeof OfferRoute
   PrivacyRoute: typeof PrivacyRoute
   ReturnsRoute: typeof ReturnsRoute
-  DyakuiemoRoute: typeof DyakuiemoRoute
   ApiLeadRoute: typeof ApiLeadRoute
 }
 
@@ -154,6 +157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeliveryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dyakuiemo': {
+      id: '/dyakuiemo'
+      path: '/dyakuiemo'
+      fullPath: '/dyakuiemo'
+      preLoaderRoute: typeof DyakuiemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/offer': {
       id: '/offer'
       path: '/offer'
@@ -175,13 +185,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReturnsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dyakuiemo': {
-      id: '/dyakuiemo'
-      path: '/dyakuiemo'
-      fullPath: '/dyakuiemo'
-      preLoaderRoute: typeof DyakuiemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/lead': {
       id: '/api/lead'
       path: '/api/lead'
@@ -196,10 +199,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CookiesRoute: CookiesRoute,
   DeliveryRoute: DeliveryRoute,
+  DyakuiemoRoute: DyakuiemoRoute,
   OfferRoute: OfferRoute,
   PrivacyRoute: PrivacyRoute,
   ReturnsRoute: ReturnsRoute,
-  DyakuiemoRoute: DyakuiemoRoute,
   ApiLeadRoute: ApiLeadRoute,
 }
 export const routeTree = rootRouteImport
