@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-const PIXEL_ID = "1749190629525376";
+const PIXEL_ID = "3557729764386334";
 const ORDER_KEY = "dyakuiemo_order";
 const HAS_TIKTOK = true;
 

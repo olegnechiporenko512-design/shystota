@@ -7,7 +7,7 @@ import appCss from "../styles.css?url";
 const APP_NAME = "Таблетки для очищення пральних машин — 299 грн";
 
 const TIKTOK_PIXEL_ID = "DAS6203C77U3N3HEQL7G";
-const FB_PIXEL_ID = "1749190629525376";
+const FB_PIXEL_ID = "3557729764386334";
 
 const TIKTOK_PIXEL_SNIPPET = `!function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)};ttq.load('${TIKTOK_PIXEL_ID}');ttq.page();ttq.track('ViewContent',{content_id:'akvakrystal-12',content_type:'product',content_name:'Аквакристал — таблетки для пральних машин',value:299,currency:'UAH'});}(window,document,'ttq');`;
 

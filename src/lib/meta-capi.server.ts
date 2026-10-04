@@ -1,6 +1,6 @@
 import { env } from "@/lib/env.server";
 
-const PIXEL_ID = "1749190629525376";
+const PIXEL_ID = "3557729764386334";
 
 export type CapiInput = {
   orderId: string;
